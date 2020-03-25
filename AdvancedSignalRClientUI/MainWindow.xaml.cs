@@ -23,15 +23,49 @@ namespace AdvancedSignalRClientUI
     {
         private readonly HubClientBuilder hubClientBuilder;
         private HubClient hubClient;
+        private bool isOpen = false;
         public MainWindow(HubClientBuilder hubClientBuilder)
         {
             InitializeComponent();
             this.hubClientBuilder = hubClientBuilder;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            hubClient = hubClientBuilder.CreateClient("Test", URL.Text);
+            if (!isOpen)
+            {
+                hubClient = hubClientBuilder.CreateClient("Test", URL.Text);
+                hubClient.OnStatusChanged += (i) =>
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        switch (i)
+                        {
+                            case Statuses.Connected:
+                                status.Fill = Brushes.Green;
+                                break;
+                            case Statuses.Disconnected:
+                                status.Fill = Brushes.Red;
+                                break;
+                            case Statuses.Reconnecting:
+                                status.Fill = Brushes.Yellow;
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                };
+                await hubClient.StartAsync();
+                (sender as Button).Content = "Close Connection";
+            }
+            else
+            {
+                await hubClientBuilder.DisposeHubClientAsync("Test");
+                hubClient = null;
+                status.Fill = Brushes.Gray;
+                (sender as Button).Content = "Start Connection";
+            }
+            isOpen = !isOpen;
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)
@@ -39,7 +73,10 @@ namespace AdvancedSignalRClientUI
             await hubClient.SendAsync("GetMarketData", "101");
             await foreach (var item in hubClient.RecieveMessages(Function.Text))
             {
-                Messages.Items.Add(item);
+                this.Dispatcher.Invoke(() =>
+                {
+                    Messages.Items.Add(item);
+                });
             }
         }
     }

@@ -10,9 +10,10 @@
         <Grid>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="10*"/>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="40*"/>
+                    <RowDefinition Height="3*"/>
                 </Grid.RowDefinitions>
                 <Grid Margin="2" VerticalAlignment="Top" Grid.Row="0">
                     <Grid.ColumnDefinitions>
@@ -44,6 +45,13 @@
                           Grid.Row="2"
                           ScrollViewer.VerticalScrollBarVisibility="Auto">
                 </ListView>
+                <Grid Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" 
+                                VerticalAlignment="Center" Margin="2">
+                        <TextBlock Margin="0 0 10 0">Status:</TextBlock>
+                        <Ellipse Width="18" Height="18" Fill="Gray" x:Name="status"></Ellipse>
+                    </StackPanel>
+                </Grid>
             </Grid>
 
         </Grid>

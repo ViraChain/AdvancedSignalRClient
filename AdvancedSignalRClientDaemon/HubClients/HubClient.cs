@@ -11,6 +11,13 @@ using System.Threading.Tasks;
 
 namespace AdvancedSignalRClientDaemon.HubClients
 {
+    public enum Statuses
+    {
+        Connected,
+        Disconnected,
+        Reconnecting
+    }
+    public delegate void StatusChanged(Statuses staus);
     public interface IHubClient
     {
         Task StartAsync();
@@ -21,15 +28,19 @@ namespace AdvancedSignalRClientDaemon.HubClients
         Task<string> SendAsync(string methodName, params object[] messages);
         IAsyncEnumerable<string> RecieveMessages(string serverMethodName);
         void CloseReciever(string serverMethodName);
+        event StatusChanged OnStatusChanged;
     }
     public class HubClient : IHubClient, IAsyncDisposable
     {
+
         private readonly HubConnection hubConnection;
         private readonly ILogger logger;
         private readonly string URL;
         private readonly string HubName;
         private readonly CancellationTokenSource cancellationTokenSource;
         private readonly Dictionary<string, CancellationTokenSource> Receivers;
+
+        public event StatusChanged OnStatusChanged;
 
         public HubClient(HubConnection hubConnection, ILogger logger, string uRL, string hubName)
         {
@@ -50,6 +61,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
 
         private Task HandleClosed(Exception ex)
         {
+            OnStatusChanged?.Invoke(Statuses.Disconnected);
             if (hubConnection.State == HubConnectionState.Disconnected)
                 logger.Error(ex, "The connection to the server has been intrupted.");
             else if (hubConnection.State == HubConnectionState.Reconnecting)
@@ -58,11 +70,13 @@ namespace AdvancedSignalRClientDaemon.HubClients
         }
         private Task HandleReconnecting(Exception ex)
         {
+            OnStatusChanged?.Invoke(Statuses.Reconnecting);
             logger.Warning("Trying to restablish the connection to the server.");
             return Task.CompletedTask;
         }
         private Task HandleReconnected(string connectionId)
         {
+            OnStatusChanged?.Invoke(Statuses.Connected);
             logger.Information("New connection has been stablished to the server with connection ID {connectionId}.", connectionId);
             return Task.CompletedTask;
         }
@@ -93,9 +107,11 @@ namespace AdvancedSignalRClientDaemon.HubClients
             try
             {
                 await hubConnection.StartAsync(cancellationTokenSource.Token);
+                OnStatusChanged?.Invoke(Statuses.Connected);
             }
             catch (Exception ex)
             {
+                OnStatusChanged?.Invoke(Statuses.Disconnected);
                 logger.Error(ex, "An unhandled exception has occurred while trying to start the connection to server.");
             }
         }
