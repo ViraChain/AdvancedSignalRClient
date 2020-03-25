@@ -19,8 +19,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
         Task<string> SendAsync(string methodName, params string[] messages);
         Task<string> SendAsync(string methodName, object message);
         Task<string> SendAsync(string methodName, params object[] messages);
-        IAsyncEnumerator<string> AddReciever(string serverMethodName);
-        IAsyncEnumerator<T> AddReciever<T>(string serverMethodName);
+        IAsyncEnumerator<string> RecieveMessager(string serverMethodName);
         void CloseReciever(string serverMethodName);
     }
     public class HubClient : IHubClient, IAsyncDisposable
@@ -249,7 +248,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
             return default;
         }
 
-        public async IAsyncEnumerator<string> AddReciever(string serverMethodName)
+        public async IAsyncEnumerator<string> RecieveMessager(string serverMethodName)
         {
             var tokenSrc = new CancellationTokenSource();
             var res = new ConcurrentQueue<string>();
@@ -267,27 +266,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
                 res.TryDequeue(out var ret);
                 yield return ret;
             }
-        }
-
-        public async IAsyncEnumerator<T> AddReciever<T>(string serverMethodName)
-        {
-            var tokenSrc = new CancellationTokenSource();
-            var res = new ConcurrentQueue<T>();
-            var _signal = new SemaphoreSlim(0);
-
-            hubConnection.On<T>(serverMethodName, data =>
-            {
-                res.Enqueue(data);
-                _signal.Release();
-            });
-
-            Receivers.Add(serverMethodName, tokenSrc);
-            while (!tokenSrc.Token.IsCancellationRequested)
-            {
-                await _signal.WaitAsync(tokenSrc.Token);
-                res.TryDequeue(out var ret);
-                yield return ret;
-            }
+            yield return $"Closing the connection to {serverMethodName}!!!";
         }
         public void CloseReciever(string serverMethodName)
         {
