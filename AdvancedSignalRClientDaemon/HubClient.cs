@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using AdvancedSignalRClientDaemon.SerilogUtils;
+using Microsoft.AspNetCore.SignalR.Client;
 using Serilog;
+using Serilog.Core;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -16,21 +19,26 @@ namespace AdvancedSignalRClientDaemon
         Task<string> SendAsync(string methodName, params string[] messages);
         Task<string> SendAsync(string methodName, object message);
         Task<string> SendAsync(string methodName, params object[] messages);
+        IAsyncEnumerator<string> AddReciever(string serverMethodName);
+        void CloseReciever(string serverMethodName);
     }
     public class HubClient : IHubClient, IAsyncDisposable
     {
         private readonly HubConnection hubConnection;
-        private readonly string URL;
-        private readonly CancellationTokenSource cancellationTokenSource;
         private readonly ILogger logger;
+        private readonly string URL;
+        private readonly string HubName;
+        private readonly CancellationTokenSource cancellationTokenSource;
+        private readonly Dictionary<string, CancellationTokenSource> Receivers;
 
-        public HubClient(HubConnection hubConnection, ILogger logger, string uRL)
+        public HubClient(HubConnection hubConnection, ILogger logger, string uRL, string hubName)
         {
             cancellationTokenSource = new CancellationTokenSource();
+            Receivers = new Dictionary<string, CancellationTokenSource>();
             URL = uRL;
+            HubName = hubName;
             this.hubConnection = hubConnection;
-            this.logger = logger;
-
+            this.logger = logger.ForContext(new HubEnricher<HubClient>(hubName, URL));
         }
 
         private void Init()
@@ -38,21 +46,21 @@ namespace AdvancedSignalRClientDaemon
             hubConnection.Closed += ex =>
             {
                 if (hubConnection.State == HubConnectionState.Disconnected)
-                    logger.Error(ex, "The connection to the {uRL} has been intrupted.", URL);
+                    logger.Error(ex, "The connection to the server has been intrupted.");
                 else if (hubConnection.State == HubConnectionState.Reconnecting)
-                    logger.Warning("Trying to restablish the connection to the {uRL}.", URL);
+                    logger.Warning("Trying to restablish the connection to the server.");
                 return Task.CompletedTask;
             };
 
             hubConnection.Reconnecting += _ =>
             {
-                logger.Warning("Trying to restablish the connection to the {uRL}.", URL);
+                logger.Warning("Trying to restablish the connection to the server.");
                 return Task.CompletedTask;
             };
 
             hubConnection.Reconnected += connectionId =>
             {
-                logger.Information("New connection has been stablished to the {uRL} with connection ID {connectionId}.", URL, connectionId);
+                logger.Information("New connection has been stablished to the server with connection ID {connectionId}.", connectionId);
                 return Task.CompletedTask;
             };
         }
@@ -70,7 +78,7 @@ namespace AdvancedSignalRClientDaemon
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "An unhandled exception has occurred while trying to start the connection to {uRL}.", URL);
+                logger.Error(ex, "An unhandled exception has occurred while trying to start the connection to server.");
             }
         }
         public async Task StopAsync()
@@ -82,7 +90,7 @@ namespace AdvancedSignalRClientDaemon
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "An unhandled exception has occurred while trying to close the connection to {uRL}.", URL);
+                logger.Error(ex, "An unhandled exception has occurred while trying to close the connection to server.");
             }
         }
 
@@ -220,6 +228,37 @@ namespace AdvancedSignalRClientDaemon
                 logger.Error(ex, "An unhandled exception has occurred while trying to send message to {methodName}", methodName);
             }
             return default;
+        }
+
+        public async IAsyncEnumerator<string> AddReciever(string serverMethodName)
+        {
+            var tokenSrc = new CancellationTokenSource();
+            var res = new ConcurrentQueue<string>();
+            var _signal = new SemaphoreSlim(0);
+
+            hubConnection.On<string>(serverMethodName, data =>
+                {
+                    res.Enqueue(data);
+                    _signal.Release();
+                });
+
+            while (!tokenSrc.Token.IsCancellationRequested)
+            {
+                await _signal.WaitAsync(tokenSrc.Token);
+                res.TryDequeue(out var ret);
+                yield return ret;
+            }
+        }
+
+        public void CloseReciever(string serverMethodName)
+        {
+            if (Receivers.ContainsKey(serverMethodName))
+            {
+                var token = Receivers[serverMethodName];
+                token.Cancel();
+                Receivers.Remove(serverMethodName);
+            }
+            hubConnection.Remove(serverMethodName);
         }
     }
 }
