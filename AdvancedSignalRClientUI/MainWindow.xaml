@@ -6,7 +6,46 @@
         xmlns:local="clr-namespace:AdvancedSignalRClientUI"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Grid x:Name="MainGrid">
+        <Grid>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="16*"/>
+                </Grid.RowDefinitions>
+                <Grid Margin="5" VerticalAlignment="Top" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Margin="5" Grid.Column="0" VerticalAlignment="Center">URL:</TextBlock>
+                    <TextBox VerticalAlignment="Stretch" Margin="5" x:Name="URL" Grid.Column="1"
+                         Text="127.0.0.1/chathub" TextAlignment="Center"></TextBox>
+                    <Button VerticalAlignment="Center" Margin="5" 
+                        Padding="2" Grid.Column="2"
+                        Click="Button_Click">Start Connection</Button>
+                </Grid>
+                <Grid Margin="5" VerticalAlignment="Top" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.3*"/>
+                        <ColumnDefinition Width="8*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Margin="5" Grid.Column="0" VerticalAlignment="Center">Method Name:</TextBlock>
+                    <TextBox VerticalAlignment="Stretch" Margin="5" x:Name="Function" Grid.Column="1"
+                         Text="Greeter" TextAlignment="Center"></TextBox>
+                    <Button VerticalAlignment="Center" Margin="5" 
+                        Padding="2" Grid.Column="2"
+                        Click="Button_Click_1">Begin</Button>
+                </Grid>
+                <ListView x:Name="Messages" Margin="5"    
+                          Grid.Row="2"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto">
+                </ListView>
+            </Grid>
 
+        </Grid>
     </Grid>
 </Window>

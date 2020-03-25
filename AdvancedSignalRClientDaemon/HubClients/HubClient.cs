@@ -19,7 +19,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
         Task<string> SendAsync(string methodName, params string[] messages);
         Task<string> SendAsync(string methodName, object message);
         Task<string> SendAsync(string methodName, params object[] messages);
-        IAsyncEnumerator<string> RecieveMessager(string serverMethodName);
+        IAsyncEnumerable<string> RecieveMessages(string serverMethodName);
         void CloseReciever(string serverMethodName);
     }
     public class HubClient : IHubClient, IAsyncDisposable
@@ -248,7 +248,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
             return default;
         }
 
-        public async IAsyncEnumerator<string> RecieveMessager(string serverMethodName)
+        public async IAsyncEnumerable<string> RecieveMessages(string serverMethodName)
         {
             var tokenSrc = new CancellationTokenSource();
             var res = new ConcurrentQueue<string>();

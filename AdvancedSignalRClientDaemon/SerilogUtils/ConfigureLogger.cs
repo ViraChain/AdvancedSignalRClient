@@ -15,7 +15,6 @@ namespace AdvancedSignalRClientDaemon.SerilogUtils
                 .WriteTo.Console()
                 .WriteTo.File("/logs.txt")
                 .CreateLogger();
-            Log.Logger = logger;
             return logger;
         }
     }
