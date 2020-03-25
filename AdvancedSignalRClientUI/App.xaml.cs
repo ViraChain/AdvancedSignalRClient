@@ -18,7 +18,7 @@ namespace AdvancedSignalRClientUI
     /// </summary>
     public partial class App : Application
     {
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private async void Application_Startup(object sender, StartupEventArgs e)
         {
             Log.Logger = ConfigureLogger.BuildLogger();
             var containerBuilder = new ContainerBuilder();
@@ -28,16 +28,14 @@ namespace AdvancedSignalRClientUI
             containerBuilder.RegisterType<Receiver>().AsSelf();
             var container = containerBuilder.Build();
 
-            using (var scope = container.BeginLifetimeScope())
-            {
-                var logger = scope.Resolve<ILogger>();
-                logger.Information("Starting Application");
+            await using var scope = container.BeginLifetimeScope();
+            var logger = scope.Resolve<ILogger>();
+            logger.Information("Starting Application");
 
-                var mainWindow = scope.Resolve<MainWindow>();
-                mainWindow.ShowDialog();
+            var mainWindow = scope.Resolve<MainWindow>();
+            mainWindow.ShowDialog();
 
-                logger.Information("Closing Application");
-            }
+            logger.Information("Closing Application");
         }
     }
 }

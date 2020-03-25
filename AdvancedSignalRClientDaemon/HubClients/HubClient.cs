@@ -250,23 +250,26 @@ namespace AdvancedSignalRClientDaemon.HubClients
 
         public async IAsyncEnumerable<string> RecieveMessages(string serverMethodName)
         {
-            var tokenSrc = new CancellationTokenSource();
-            var res = new ConcurrentQueue<string>();
-            var _signal = new SemaphoreSlim(0);
-
-            hubConnection.On<string>(serverMethodName, data =>
-                {
-                    res.Enqueue(data);
-                    _signal.Release();
-                });
-            Receivers.Add(serverMethodName, tokenSrc);
-            while (!tokenSrc.Token.IsCancellationRequested)
+            if (Receivers.ContainsKey(serverMethodName))
             {
-                await _signal.WaitAsync(tokenSrc.Token);
-                res.TryDequeue(out var ret);
-                yield return ret;
+                var tokenSrc = new CancellationTokenSource();
+                var res = new ConcurrentQueue<string>();
+                var _signal = new SemaphoreSlim(0);
+
+                hubConnection.On<string>(serverMethodName, data =>
+                    {
+                        res.Enqueue(data);
+                        _signal.Release();
+                    });
+                Receivers.Add(serverMethodName, tokenSrc);
+                while (!tokenSrc.Token.IsCancellationRequested)
+                {
+                    await _signal.WaitAsync(tokenSrc.Token);
+                    res.TryDequeue(out var ret);
+                    yield return ret;
+                }
+                yield return $"Closing the connection to {serverMethodName}!!!";
             }
-            yield return $"Closing the connection to {serverMethodName}!!!";
         }
         public void CloseReciever(string serverMethodName)
         {
