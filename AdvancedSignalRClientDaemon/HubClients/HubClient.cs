@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AdvancedSignalRClientDaemon
+namespace AdvancedSignalRClientDaemon.HubClients
 {
     public interface IHubClient
     {
@@ -20,6 +20,7 @@ namespace AdvancedSignalRClientDaemon
         Task<string> SendAsync(string methodName, object message);
         Task<string> SendAsync(string methodName, params object[] messages);
         IAsyncEnumerator<string> AddReciever(string serverMethodName);
+        IAsyncEnumerator<T> AddReciever<T>(string serverMethodName);
         void CloseReciever(string serverMethodName);
     }
     public class HubClient : IHubClient, IAsyncDisposable
@@ -43,29 +44,47 @@ namespace AdvancedSignalRClientDaemon
 
         private void Init()
         {
-            hubConnection.Closed += ex =>
-            {
-                if (hubConnection.State == HubConnectionState.Disconnected)
-                    logger.Error(ex, "The connection to the server has been intrupted.");
-                else if (hubConnection.State == HubConnectionState.Reconnecting)
-                    logger.Warning("Trying to restablish the connection to the server.");
-                return Task.CompletedTask;
-            };
+            hubConnection.Closed += HandleClosed;
+            hubConnection.Reconnecting += HandleReconnecting;
+            hubConnection.Reconnected += HandleReconnected;
+        }
 
-            hubConnection.Reconnecting += _ =>
-            {
+        private Task HandleClosed(Exception ex)
+        {
+            if (hubConnection.State == HubConnectionState.Disconnected)
+                logger.Error(ex, "The connection to the server has been intrupted.");
+            else if (hubConnection.State == HubConnectionState.Reconnecting)
                 logger.Warning("Trying to restablish the connection to the server.");
-                return Task.CompletedTask;
-            };
-
-            hubConnection.Reconnected += connectionId =>
-            {
-                logger.Information("New connection has been stablished to the server with connection ID {connectionId}.", connectionId);
-                return Task.CompletedTask;
-            };
+            return Task.CompletedTask;
+        }
+        private Task HandleReconnecting(Exception ex)
+        {
+            logger.Warning("Trying to restablish the connection to the server.");
+            return Task.CompletedTask;
+        }
+        private Task HandleReconnected(string connectionId)
+        {
+            logger.Information("New connection has been stablished to the server with connection ID {connectionId}.", connectionId);
+            return Task.CompletedTask;
         }
         public async ValueTask DisposeAsync()
         {
+            hubConnection.Closed -= HandleClosed;
+            hubConnection.Reconnecting -= HandleReconnecting;
+            hubConnection.Reconnected -= HandleReconnected;
+
+            foreach (var item in Receivers)
+            {
+                item.Value.Cancel();
+
+            }
+            foreach (var item in Receivers)
+            {
+                item.Value.Dispose();
+            }
+            Receivers.Clear();
+
+            await StopAsync();
             cancellationTokenSource.Dispose();
             await hubConnection?.DisposeAsync();
         }
@@ -241,7 +260,7 @@ namespace AdvancedSignalRClientDaemon
                     res.Enqueue(data);
                     _signal.Release();
                 });
-
+            Receivers.Add(serverMethodName, tokenSrc);
             while (!tokenSrc.Token.IsCancellationRequested)
             {
                 await _signal.WaitAsync(tokenSrc.Token);
@@ -250,6 +269,26 @@ namespace AdvancedSignalRClientDaemon
             }
         }
 
+        public async IAsyncEnumerator<T> AddReciever<T>(string serverMethodName)
+        {
+            var tokenSrc = new CancellationTokenSource();
+            var res = new ConcurrentQueue<T>();
+            var _signal = new SemaphoreSlim(0);
+
+            hubConnection.On<T>(serverMethodName, data =>
+            {
+                res.Enqueue(data);
+                _signal.Release();
+            });
+
+            Receivers.Add(serverMethodName, tokenSrc);
+            while (!tokenSrc.Token.IsCancellationRequested)
+            {
+                await _signal.WaitAsync(tokenSrc.Token);
+                res.TryDequeue(out var ret);
+                yield return ret;
+            }
+        }
         public void CloseReciever(string serverMethodName)
         {
             if (Receivers.ContainsKey(serverMethodName))
