@@ -61,7 +61,6 @@ namespace AdvancedSignalRClientUI
             else
             {
                 await hubClientBuilder.DisposeHubClientAsync("Test");
-                hubClient = null;
                 status.Fill = Brushes.Gray;
                 (sender as Button).Content = "Start Connection";
             }
@@ -71,12 +70,19 @@ namespace AdvancedSignalRClientUI
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
             await hubClient.SendAsync("GetMarketData", "101");
-            await foreach (var item in hubClient.RecieveMessages(Function.Text))
+            try
             {
-                this.Dispatcher.Invoke(() =>
+                await foreach (var item in hubClient.RecieveMessages(Function.Text))
                 {
-                    Messages.Items.Add(item);
-                });
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        Messages.Items.Add(item);
+                    });
+                }
+            }
+            catch
+            {
+
             }
         }
     }

@@ -20,6 +20,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
 
         public HubClient CreateClient(string hubName, string uRL)
         {
+            if (hubClients.ContainsKey(hubName)) return hubClients[hubName];
             var connection = new HubConnectionBuilder()
                 .WithUrl(uRL)
                 .Build();
@@ -36,6 +37,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
         {
             hubClients.TryGetValue(hubName, out var hubClient);
             await hubClient.DisposeAsync();
+            hubClients.Remove(hubName);
         }
 
         public async ValueTask DisposeAsync()

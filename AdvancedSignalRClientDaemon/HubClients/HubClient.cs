@@ -266,7 +266,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
 
         public async IAsyncEnumerable<string> RecieveMessages(string serverMethodName)
         {
-            if (Receivers.ContainsKey(serverMethodName))
+            if (!Receivers.ContainsKey(serverMethodName))
             {
                 var tokenSrc = new CancellationTokenSource();
                 var res = new ConcurrentQueue<string>();

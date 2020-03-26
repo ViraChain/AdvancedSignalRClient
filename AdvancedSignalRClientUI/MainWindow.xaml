@@ -36,7 +36,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Margin="2" Grid.Column="0" VerticalAlignment="Center">Method Name:</TextBlock>
                     <TextBox VerticalAlignment="Stretch" Margin="2" x:Name="Function" Grid.Column="1"
-                         Text="MarketData" TextAlignment="Center"></TextBox>
+                         Text="getMarketData" TextAlignment="Center"></TextBox>
                     <Button VerticalAlignment="Center" Margin="2" 
                         Padding="2" Grid.Column="2"
                         Click="Button_Click_1">Begin</Button>
