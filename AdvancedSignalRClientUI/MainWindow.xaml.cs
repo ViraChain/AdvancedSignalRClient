@@ -23,7 +23,7 @@ namespace AdvancedSignalRClientUI
     {
         private readonly HubClientBuilder hubClientBuilder;
         private HubClient hubClient;
-        private bool isOpen = false;
+        public bool IsOpen { get; set; } = false;
         public MainWindow(HubClientBuilder hubClientBuilder)
         {
             InitializeComponent();
@@ -32,7 +32,7 @@ namespace AdvancedSignalRClientUI
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (!isOpen)
+            if (!IsOpen)
             {
                 hubClient = hubClientBuilder.CreateClient("Test", URL.Text);
                 hubClient.OnStatusChanged += (i) =>
@@ -57,19 +57,22 @@ namespace AdvancedSignalRClientUI
                 };
                 await hubClient.StartAsync();
                 (sender as Button).Content = "Close Connection";
+                SendButton.IsEnabled = true;
+                ReceiveButton.IsEnabled = true;
             }
             else
             {
+                SendButton.IsEnabled = false;
+                ReceiveButton.IsEnabled = false;
                 await hubClientBuilder.DisposeHubClientAsync("Test");
                 status.Fill = Brushes.Gray;
                 (sender as Button).Content = "Start Connection";
             }
-            isOpen = !isOpen;
+            IsOpen = !IsOpen;
         }
 
         private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            await hubClient.SendAsync("GetMarketData", "101");
             try
             {
                 await foreach (var item in hubClient.RecieveMessages(Function.Text))
@@ -84,6 +87,11 @@ namespace AdvancedSignalRClientUI
             {
 
             }
+        }
+
+        private async void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            await hubClient.SendAsync(sfName.Text, message.Text);
         }
     }
 }
