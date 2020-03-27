@@ -70,6 +70,7 @@ namespace AdvancedSignalRClientUI
 
         private async void Receive_Button_Click(object sender, RoutedEventArgs e)
         {
+            Messages.Items.Clear();
             try
             {
                 await foreach (var item in hubClient.RecieveMessages(Function.Text))
