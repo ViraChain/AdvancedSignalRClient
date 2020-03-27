@@ -2,7 +2,6 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AdvancedSignalRClientDaemon.HubClients
@@ -20,7 +19,11 @@ namespace AdvancedSignalRClientDaemon.HubClients
 
         public HubClient CreateClient(string hubName, string uRL)
         {
-            if (hubClients.ContainsKey(hubName)) return hubClients[hubName];
+            if (hubClients.ContainsKey(hubName))
+            {
+                return hubClients[hubName];
+            }
+
             var connection = new HubConnectionBuilder()
                 .WithUrl(uRL)
                 .Build();

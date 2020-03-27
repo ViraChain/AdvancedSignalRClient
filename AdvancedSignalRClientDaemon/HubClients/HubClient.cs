@@ -1,11 +1,9 @@
 ﻿using AdvancedSignalRClientDaemon.SerilogUtils;
 using Microsoft.AspNetCore.SignalR.Client;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -63,9 +61,14 @@ namespace AdvancedSignalRClientDaemon.HubClients
         {
             OnStatusChanged?.Invoke(Statuses.Disconnected);
             if (hubConnection.State == HubConnectionState.Disconnected)
+            {
                 logger.Error(ex, "The connection to the server has been intrupted.");
+            }
             else if (hubConnection.State == HubConnectionState.Reconnecting)
+            {
                 logger.Warning("Trying to restablish the connection to the server.");
+            }
+
             return Task.CompletedTask;
         }
         private Task HandleReconnecting(Exception ex)
@@ -146,7 +149,11 @@ namespace AdvancedSignalRClientDaemon.HubClients
         {
             _ = methodName ?? throw new ArgumentNullException("Argument methodName cant be null");
             _ = messages ?? throw new ArgumentNullException("Argument messages cant be null");
-            if (messages.Length > 10) throw new ArgumentException("You cant send more than 10 arguments.");
+            if (messages.Length > 10)
+            {
+                throw new ArgumentException("You cant send more than 10 arguments.");
+            }
+
             try
             {
 
@@ -214,7 +221,11 @@ namespace AdvancedSignalRClientDaemon.HubClients
         {
             _ = methodName ?? throw new ArgumentNullException("Argument methodName cant be null");
             _ = messages ?? throw new ArgumentNullException("Argument messages cant be null");
-            if (messages.Length > 10) throw new ArgumentException("You cant send more than 10 arguments.");
+            if (messages.Length > 10)
+            {
+                throw new ArgumentException("You cant send more than 10 arguments.");
+            }
+
             try
             {
 

@@ -1,9 +1,6 @@
 ﻿using AdvancedSignalRClientDaemon.HubClients;
 using Autofac;
 using AutofacSerilogIntegration;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AdvancedSignalRClientDaemon
 {
@@ -12,10 +9,10 @@ namespace AdvancedSignalRClientDaemon
         private ContainerBuilder containerBuilder { get; }
         public HubClientDaemon()
         {
-            this.containerBuilder = new ContainerBuilder();
-            this.containerBuilder.RegisterLogger();
-            this.containerBuilder.RegisterType<HubClientBuilder>().AsSelf();
-            this.containerBuilder.Build();
+            containerBuilder = new ContainerBuilder();
+            containerBuilder.RegisterLogger();
+            containerBuilder.RegisterType<HubClientBuilder>().AsSelf();
+            containerBuilder.Build();
         }
         public HubClientDaemon(ContainerBuilder containerBuilder)
         {
