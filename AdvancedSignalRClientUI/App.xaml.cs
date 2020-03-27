@@ -14,7 +14,7 @@ namespace AdvancedSignalRClientUI
     {
         private async void Application_Startup(object sender, StartupEventArgs e)
         {
-            Log.Logger = ConfigureLogger.BuildLogger(new MessegeBoxSink());
+            Log.Logger = ConfigureLogger.BuildLogger();
             var containerBuilder = new ContainerBuilder();
             var daemon = new HubClientDaemon(containerBuilder);
             containerBuilder.RegisterLogger();

@@ -10,6 +10,7 @@ namespace AdvancedSignalRClientDaemon.SerilogUtils
             var logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.FromLogContext()
+                .WriteTo.Sink(new ListSink())
                 .WriteTo.Console()
                 .WriteTo.File("./logs.log")
                 .CreateLogger();

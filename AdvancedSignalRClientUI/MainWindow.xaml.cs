@@ -1,4 +1,6 @@
 ﻿using AdvancedSignalRClientDaemon.HubClients;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -81,6 +83,11 @@ namespace AdvancedSignalRClientUI
         private async void Send_Button_Click(object sender, RoutedEventArgs e)
         {
             await hubClient.SendAsync(sfName.Text, message.Text);
+        }
+
+        private void TextBlock_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            
         }
     }
 }

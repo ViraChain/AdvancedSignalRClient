@@ -66,6 +66,9 @@
                           ScrollViewer.VerticalScrollBarVisibility="Auto">
                 </ListView>
                 <Grid Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left"
+                               MouseDown="TextBlock_MouseDown" Cursor="Hand"
+                            Margin="2">Show Logs</TextBlock>
                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" 
                                 VerticalAlignment="Center" Margin="2">
                         <TextBlock Margin="0 0 10 0">Status:</TextBlock>
