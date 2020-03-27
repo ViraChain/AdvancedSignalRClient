@@ -30,7 +30,7 @@ namespace AdvancedSignalRClientUI
             this.hubClientBuilder = hubClientBuilder;
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void Connect_Button_Click(object sender, RoutedEventArgs e)
         {
             if (!IsOpen)
             {
@@ -71,7 +71,7 @@ namespace AdvancedSignalRClientUI
             IsOpen = !IsOpen;
         }
 
-        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        private async void Receive_Button_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace AdvancedSignalRClientUI
             }
         }
 
-        private async void Button_Click_2(object sender, RoutedEventArgs e)
+        private async void Send_Button_Click(object sender, RoutedEventArgs e)
         {
             await hubClient.SendAsync(sfName.Text, message.Text);
         }

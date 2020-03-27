@@ -27,7 +27,7 @@
                          Text="https://localhost:5202/prices" TextAlignment="Center"></TextBox>
                     <Button VerticalAlignment="Center" Margin="2" 
                         Padding="2" Grid.Column="2"
-                        Click="Button_Click">Start Connection</Button>
+                        Click="Connect_Button_Click">Start Connection</Button>
                 </Grid>
                 <Grid Margin="2" VerticalAlignment="Top" Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -45,7 +45,7 @@
                          Text="101" TextAlignment="Center"></TextBox>
                     <Button VerticalAlignment="Center" Margin="2" IsEnabled="False"
                         Padding="2" Grid.Column="4" x:Name="SendButton"
-                        Click="Button_Click_2">Send</Button>
+                        Click="Send_Button_Click">Send</Button>
                 </Grid>
                 <Grid Margin="2" VerticalAlignment="Top" Grid.Row="2">
                     <Grid.ColumnDefinitions>
@@ -59,7 +59,7 @@
                          Text="getMarketData" TextAlignment="Center"/>
                     <Button VerticalAlignment="Center" x:Name="ReceiveButton" 
                         Padding="2" Grid.Column="2" IsEnabled="False"
-                        Click="Button_Click_1" Grid.ColumnSpan="2">Begin</Button>
+                        Click="Receive_Button_Click" Grid.ColumnSpan="2">Begin</Button>
                 </Grid>
                 <ListView x:Name="Messages" Margin="2"    
                           Grid.Row="3"
