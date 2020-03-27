@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace AdvancedSignalRClientDaemon.HubClients
@@ -25,7 +26,17 @@ namespace AdvancedSignalRClientDaemon.HubClients
             }
 
             var connection = new HubConnectionBuilder()
-                .WithUrl(uRL)
+                .WithUrl(uRL, op =>
+                 {
+                     op.HttpMessageHandlerFactory = (message) =>
+                     {
+                         if (message is HttpClientHandler clientHandler)
+                             clientHandler.ServerCertificateCustomValidationCallback +=
+                                  (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                         return message;
+                     };
+                 })
+                .WithAutomaticReconnect()
                 .Build();
             var hubClient = new HubClient(connection, logger, uRL, hubName);
             hubClients.Add(hubName, hubClient);

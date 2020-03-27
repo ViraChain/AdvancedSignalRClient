@@ -33,12 +33,18 @@ namespace AdvancedSignalRClientUI
                         switch (i)
                         {
                             case Statuses.Connected:
+                                SendButton.IsEnabled = true;
+                                ReceiveButton.IsEnabled = true;
                                 status.Fill = Brushes.Green;
                                 break;
                             case Statuses.Disconnected:
+                                SendButton.IsEnabled = false;
+                                ReceiveButton.IsEnabled = false;
                                 status.Fill = Brushes.Red;
                                 break;
                             case Statuses.Reconnecting:
+                                SendButton.IsEnabled = false;
+                                ReceiveButton.IsEnabled = false;
                                 status.Fill = Brushes.Yellow;
                                 break;
                             default:
