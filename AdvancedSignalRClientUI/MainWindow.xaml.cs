@@ -47,6 +47,11 @@ namespace AdvancedSignalRClientUI
                                 ReceiveButton.IsEnabled = false;
                                 status.Fill = Brushes.Yellow;
                                 break;
+                            case Statuses.Connecting:
+                                SendButton.IsEnabled = false;
+                                ReceiveButton.IsEnabled = false;
+                                status.Fill = Brushes.YellowGreen;
+                                break;
                             default:
                                 break;
                         }
@@ -94,7 +99,7 @@ namespace AdvancedSignalRClientUI
 
         private void TextBlock_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            
+
         }
     }
 }

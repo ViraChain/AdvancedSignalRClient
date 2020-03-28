@@ -12,6 +12,7 @@ namespace AdvancedSignalRClientDaemon.HubClients
     public enum Statuses
     {
         Connected,
+        Connecting,
         Disconnected,
         Reconnecting
     }
@@ -110,7 +111,10 @@ namespace AdvancedSignalRClientDaemon.HubClients
             try
             {
                 await hubConnection.StartAsync(cancellationTokenSource.Token);
-                OnStatusChanged?.Invoke(Statuses.Connected);
+                if (hubConnection.State == HubConnectionState.Connected) OnStatusChanged?.Invoke(Statuses.Connected);
+                if (hubConnection.State == HubConnectionState.Connecting) OnStatusChanged?.Invoke(Statuses.Connecting);
+                if (hubConnection.State == HubConnectionState.Reconnecting) OnStatusChanged?.Invoke(Statuses.Reconnecting);
+                if (hubConnection.State == HubConnectionState.Disconnected) OnStatusChanged?.Invoke(Statuses.Disconnected);
             }
             catch (Exception ex)
             {
