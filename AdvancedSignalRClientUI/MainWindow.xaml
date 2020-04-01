@@ -24,7 +24,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Margin="2" Grid.Column="0" VerticalAlignment="Center">URL:</TextBlock>
                     <TextBox VerticalAlignment="Stretch" Margin="2" x:Name="URL" Grid.Column="1"
-                         Text="https://localhost:5202/prices" TextAlignment="Center"></TextBox>
+                         Text="https://localhost:5202/prices?authToken=" TextAlignment="Center"></TextBox>
                     <Button VerticalAlignment="Center" Margin="2" 
                         Padding="2" Grid.Column="2"
                         Click="Connect_Button_Click">Start Connection</Button>
